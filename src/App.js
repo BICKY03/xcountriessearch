@@ -9,7 +9,12 @@ function App() {
 
   useEffect(() => {
     fetch('https://restcountries.com/v3.1/all')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
         setCountries(data);
         setFilteredCountries(data);
@@ -36,7 +41,7 @@ function App() {
       <div className="countryGrid">
         {filteredCountries.map((country) => (
           <div key={country.cca3} className="countryCard">
-            <img src={country.flags.svg} alt={`Flag of ${country.name.common}`} />
+            <img src={country.flags.png} alt={`Flag of ${country.name.common}`} />
             <p>{country.name.common}</p>
           </div>
         ))}
@@ -46,3 +51,4 @@ function App() {
 }
 
 export default App;
+
