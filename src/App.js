@@ -1,55 +1,67 @@
-// src/App.js
-import React, { useEffect, useState } from 'react';
-import './App.css';
+import { useEffect, useState } from "react";
+import "./index.css";
 
-function App() {
-  const [countries, setCountries] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredCountries, setFilteredCountries] = useState([]);
-
-  useEffect(() => {
-    fetch('https://restcountries.com/v3.1/all')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setCountries(data);
-        setFilteredCountries(data);
-      })
-      .catch(error => console.error('Error fetching countries:', error));
-  }, []);
-
-  useEffect(() => {
-    const results = countries.filter(country =>
-      country.name.common.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredCountries(results);
-  }, [searchTerm, countries]);
-
+function CountryCard({ country }) {
   return (
-    <div className="App">
-      <input
-        type="text"
-        placeholder="Search for a country..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="searchBar"
+    <div className="countryCard">
+      <img
+        src={country.flags.png}
+        alt={`Flag of ${country.name.common}`}
+        className="card__img"
       />
-      <div className="countryGrid">
-        {filteredCountries.map((country) => (
-          <div key={country.cca3} className="countryCard">
-            <img src={country.flags.png} alt={`Flag of ${country.name.common}`} />
-            <p>{country.name.common}</p>
-          </div>
-        ))}
-      </div>
+      <h2>{country.name.common}</h2>
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  const [countries, setCountries] = useState([]);
+  const [searchedCountries, setSearchCountries] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+  };
+
+  useEffect(() => {
+    fetch("https://restcountries.com/v3.1/all")
+      .then((res) => res.json())
+      .then((data) => setCountries(data))
+      .catch((err) => console.log("Error fetching API"));
+  });
+
+  useEffect(() => {
+    if (search) {
+      setSearchCountries([
+        ...countries.filter((country) =>
+          country.name.common.toLowerCase().includes(search.toLowerCase())
+        ),
+      ]);
+    }
+  }, [search, countries]);
+
+  return (
+    <div className="wrapper">
+      <div className="search__wrapper">
+        <input
+          type="text"
+          placeholder="Search for countries..."
+          value={search}
+          onChange={handleSearch}
+        />
+      </div>
+      <div class="containerStyle">
+        {search &&
+          searchedCountries.map((country) => (
+            <CountryCard key={country.name.common} country={country} />
+          ))}
+        {!search &&
+          countries.map((country) => (
+            <CountryCard key={country.name.common} country={country} />
+          ))}
+      </div>
+    </div>
+  );
+}
 
 
